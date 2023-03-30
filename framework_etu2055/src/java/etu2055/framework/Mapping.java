@@ -39,5 +39,5 @@ public class Mapping {
         this.className = className;
         this.Method = Method;
     }
-    
+
 }
