@@ -18,35 +18,26 @@ import java.util.List;
 public class Mapping {
     String className;
     String Method;
-    
-    	public static List<Class<?>> getModelClasses(){
-		
-		List<Class<?>> classes= new ArrayList<>();
-		String package_name= "classe";
-		try {
-			ClassLoader classLoader= Thread.currentThread().getContextClassLoader();
-			Enumeration<URL> resources= classLoader.getResources(package_name);
-			while(resources.hasMoreElements()) {
-				URL res= resources.nextElement();
-				if(res.getProtocol().equals("file")) {
-					File packageDir= new File(res.toURI());
-					for(File file : packageDir.listFiles()) {
-						String filename= file.getName();
-						if(filename.endsWith(".class")) {
-							String className= filename.substring(0, filename.length()-6);
-							Class<?> c= Class.forName(package_name + "." + className);
-							classes.add(c);
-						}
-					}
-				}
-			}
-			
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-//		for(int i=0; i<classes.size(); i++) {
-//			System.out.println(classes.get(i).getName());
-//		}
-		return classes;
-	}
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getMethod() {
+        return Method;
+    }
+
+    public void setMethod(String Method) {
+        this.Method = Method;
+    }
+
+    public Mapping(String className, String Method) {
+        this.className = className;
+        this.Method = Method;
+    }
+
 }
