@@ -1,0 +1,25 @@
+DOCUMENTATION
+
+1-Le package du model commence par etu2055
+
+2-Annotation utiliser c'est @AppRoute(url =) et commence par /
+
+3-Configuration de web.xml
+	<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                      http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+  version="3.1"
+  metadata-complete="true"> 
+    <servlet>
+      <servlet-name>frontservlet</servlet-name>
+      <servlet-class>etu2055.framework.servlet.FrontServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>frontservlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+</web-app>
+
+4-Placer dans les redirections les URL des fonctions de modeles si c'est l'action souhaite  
