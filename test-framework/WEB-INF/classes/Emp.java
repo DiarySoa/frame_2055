@@ -6,7 +6,9 @@ import java.util.Calendar;
 
 import etu2055.framework.annotation.AppRoute;
 import etu2055.framework.ModelView;
+import etu2055.framework.annotation.Singleton;
 
+@Singleton()
 public class Emp {
 	String nom;
 	String prenom;
