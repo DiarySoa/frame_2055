@@ -10,6 +10,7 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.text.ParseException;
@@ -18,6 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import etu2055.framework.Mapping;
 import etu2055.framework.ModelView;
 
@@ -130,7 +132,34 @@ public class FrontServlet extends HttpServlet{
 
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {		
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {     
+		PrintWriter out = response.getWriter();
+        try {     
+        	if(request.getContentType() != null) {
+        		System.out.println(request.getContentType());
+        		ArrayList<Upload> allUploads = new ArrayList<Upload>();
+        		Collection<Part> parts = request.getParts();
+				if(parts != null){
+					for (Part part : parts) {						
+						String fileName = part.getName();
+						Part filePart = request.getPart(fileName);
+						InputStream in = filePart.getInputStream();
+						byte[] fileBytes = in.readAllBytes();
+						String directory = "./uploads/";
+						File file = new File(directory);
+						if(!file.exists()){
+							file.mkdirs();
+						}
+						System.out.println("FileName: "+fileName+" ,Directory: "+directory+" FileBytes: "+fileBytes);
+						Upload Upload = new Upload();
+						Upload.setNom(fileName);
+						Upload.setSavePath(directory);
+						Upload.setByte_tab(fileBytes);
+						allUploads.add(Upload);						
+					}
+				}
+				System.out.println(allUploads);
+				request.setAttribute("all_uploads", allUploads);
+            
         	String url = request.getRequestURL().toString()+"?"+request.getQueryString();
         	out.println("URL: "+url);   
 			String doList = "";
@@ -148,6 +177,42 @@ public class FrontServlet extends HttpServlet{
                 if(this.getMappingUrls().containsKey(urlString)) {
                 	Mapping mapping = this.getMappingUrls().get(urlString);
                 	Class clazz = Class.forName(mapping.getClassName());
+<<<<<<< Updated upstream
+=======
+                	Object object = clazz.getConstructor().newInstance();
+                	Field[] fields = object.getClass().getDeclaredFields();
+                	Method[] allMethods = object.getClass().getDeclaredMethods();
+                 	Enumeration<String> enumeration = request.getParameterNames();
+					ArrayList<String> enumerationList = new ArrayList<String>();
+					enumerationList = enumerationToList(enumeration);
+					Method equalMethod = null;
+					for (int i = 0; i < allMethods.length; i++) {
+						if(allMethods[i].getName().compareTo(mapping.getMethod())==0) {
+							equalMethod = allMethods[i];
+							break;
+						}
+					}
+					Parameter[] parameters = equalMethod.getParameters();
+					Object[] declaredParameter = new Object[parameters.length];
+					for (int i = 0; i < parameters.length; i++) {
+						if(checkIfExistForParameter(enumerationList, parameters[i])) {
+							Object parameterObject = request.getParameter(parameters[i].getName().trim());
+							parameterObject = cast(parameterObject, parameters[i].getType());
+							declaredParameter[i] = parameterObject;
+						}
+						else declaredParameter[i] = null;
+					}
+                	for (int i = 0; i < fields.length; i++) {
+						System.out.println("FIELD: "+fields[i].getName());
+						if(checkIfExist(enumerationList, fields[i])) {
+							System.out.println("EXIST FIELD: "+fields[i].getName());
+							Object attributObject = request.getParameter(fields[i].getName());
+							Object objectCast = cast(attributObject, fields[i].getType());
+							Method method = clazz.getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+							method.invoke(object, objectCast);
+						}
+					}
+>>>>>>> Stashed changes
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
                 	if(returnObject instanceof ModelView) {
