@@ -149,8 +149,6 @@ public class FrontServlet extends HttpServlet{
                 if(this.getMappingUrls().containsKey(urlString)) {
                 	Mapping mapping = this.getMappingUrls().get(urlString);
                 	Class clazz = Class.forName(mapping.getClassName());
-<<<<<<< Updated upstream
-=======
                 	Object object = clazz.getConstructor().newInstance();
                 	Field[] fields = object.getClass().getDeclaredFields();
                 	Method[] allMethods = object.getClass().getDeclaredMethods();
@@ -174,6 +172,13 @@ public class FrontServlet extends HttpServlet{
 						}
 						else declaredParameter[i] = null;
 					}
+
+                	Object object = clazz.getConstructor().newInstance();
+                	Field[] fields = object.getClass().getDeclaredFields();
+                	Enumeration<String> enumeration = request.getParameterNames();
+					ArrayList<String> enumerationList = new ArrayList<String>();
+					enumerationList = enumerationToList(enumeration);
+
                 	for (int i = 0; i < fields.length; i++) {
 						System.out.println("FIELD: "+fields[i].getName());
 						if(checkIfExist(enumerationList, fields[i])) {
@@ -184,7 +189,6 @@ public class FrontServlet extends HttpServlet{
 							method.invoke(object, objectCast);
 						}
 					}
->>>>>>> Stashed changes
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
                 	if(returnObject instanceof ModelView) {
