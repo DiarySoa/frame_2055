@@ -6,7 +6,7 @@ package etu2055.framework.servlet;
  * and open the template in the editor.
  */
 
-//import etu2055.framework.Mapping;
+import etu2055.framework.Mapping;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -80,5 +80,5 @@ public class FrontServlet extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
-   
+    HashMap<String, Mapping> MappingUrls;
 }
