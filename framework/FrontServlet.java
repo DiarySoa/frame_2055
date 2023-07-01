@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.util.Date;
 import java.text.DateFormat;
@@ -148,6 +149,42 @@ public class FrontServlet extends HttpServlet{
                 if(this.getMappingUrls().containsKey(urlString)) {
                 	Mapping mapping = this.getMappingUrls().get(urlString);
                 	Class clazz = Class.forName(mapping.getClassName());
+<<<<<<< Updated upstream
+=======
+                	Object object = clazz.getConstructor().newInstance();
+                	Field[] fields = object.getClass().getDeclaredFields();
+                	Method[] allMethods = object.getClass().getDeclaredMethods();
+                 	Enumeration<String> enumeration = request.getParameterNames();
+					ArrayList<String> enumerationList = new ArrayList<String>();
+					enumerationList = enumerationToList(enumeration);
+					Method equalMethod = null;
+					for (int i = 0; i < allMethods.length; i++) {
+						if(allMethods[i].getName().compareTo(mapping.getMethod())==0) {
+							equalMethod = allMethods[i];
+							break;
+						}
+					}
+					Parameter[] parameters = equalMethod.getParameters();
+					Object[] declaredParameter = new Object[parameters.length];
+					for (int i = 0; i < parameters.length; i++) {
+						if(checkIfExistForParameter(enumerationList, parameters[i])) {
+							Object parameterObject = request.getParameter(parameters[i].getName().trim());
+							parameterObject = cast(parameterObject, parameters[i].getType());
+							declaredParameter[i] = parameterObject;
+						}
+						else declaredParameter[i] = null;
+					}
+                	for (int i = 0; i < fields.length; i++) {
+						System.out.println("FIELD: "+fields[i].getName());
+						if(checkIfExist(enumerationList, fields[i])) {
+							System.out.println("EXIST FIELD: "+fields[i].getName());
+							Object attributObject = request.getParameter(fields[i].getName());
+							Object objectCast = cast(attributObject, fields[i].getType());
+							Method method = clazz.getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+							method.invoke(object, objectCast);
+						}
+					}
+>>>>>>> Stashed changes
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
                 	if(returnObject instanceof ModelView) {
