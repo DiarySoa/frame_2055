@@ -148,6 +148,8 @@ public class FrontServlet extends HttpServlet{
                 if(this.getMappingUrls().containsKey(urlString)) {
                 	Mapping mapping = this.getMappingUrls().get(urlString);
                 	Class clazz = Class.forName(mapping.getClassName());
+                	Object object = clazz.getConstructor().newInstance();
+        
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
                 	if(returnObject instanceof ModelView) {
