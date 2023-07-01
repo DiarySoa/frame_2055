@@ -2,17 +2,21 @@ package etu2055.framework.servlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.text.ParseException;
+import javax.servlet.http.Part;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,6 +27,9 @@ import etu2055.framework.ModelView;
 
 public class FrontServlet extends HttpServlet{
 	HashMap<String, Mapping> mappingUrls;
+	HashMap<String, Object> singletons;
+	String connectedSession;
+	String profileSession;
 	
 	public HashMap<String, Mapping> getMappingUrls() {
 		return mappingUrls;
@@ -31,12 +38,17 @@ public class FrontServlet extends HttpServlet{
 	public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
 		this.mappingUrls = mappingUrls;
 	}
+		
+	public HashMap<String, Object> getSingletons() {
+		return singletons;
+	}
+
+	public void setSingletons(HashMap<String, Object> singletons) {
+		this.singletons = singletons;
+	}
 	
 	public static ArrayList<Class<?>> checkClasses(File directory, String packageName) throws Exception {
         ArrayList<Class<?>> classes = new ArrayList<>();
-        // if (!directory.exists()) {
-        //     return classes;
-        // }
 		String path = packageName.replaceAll("[.]","/");
 		URL packageUrl = Thread.currentThread().getContextClassLoader().getResource(path);
 		directory = new File(packageUrl.toURI());
@@ -120,6 +132,11 @@ public class FrontServlet extends HttpServlet{
 	                        newmap.setMethod(method.getName());
 	                        this.getMappingUrls().put(url,newmap);
 	                    }
+	                }
+
+					if(classe.isAnnotationPresent(etu2055.framework.annotation.Singleton.class)) {
+						System.out.println("Class singleton: "+classe.getName());
+	                	this.getSingletons().put(classe.getName(), null);
 	                }
 	            } 
 	        }
