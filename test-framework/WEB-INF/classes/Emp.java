@@ -63,4 +63,12 @@ public class Emp {
 		modelView.addItem("test",this.getNom());
 		return modelView;
 	}
+
+	@AppRoute(url= "/emp-Appel")
+	public ModelView appel(){
+		ModelView modelView = new ModelView("singleton.jsp");
+		this.appel = this.appel+1;
+		modelView.addItem("nbr",this.appel);
+		return modelView;
+	}
 }
