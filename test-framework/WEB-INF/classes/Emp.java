@@ -59,8 +59,10 @@ public class Emp {
 	}
 	@AppRoute(url = "/emp-printNom")
 	public ModelView printName(){
-		ModelView modelView = new ModelView("Veloma.jsp");
+		ModelView modelView = new ModelView("test.jsp");
 		modelView.addItem("test",this.getNom());
+		modelView.addItem("test2",this.getPrenom());
+		modelView.addItem("test3",this.getAge());
 		return modelView;
 	}
 
