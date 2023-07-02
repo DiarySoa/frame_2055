@@ -9,9 +9,11 @@
         </head>
 
         <body>
-            <p><a href="emp-getAll">Click here </a>to do test</p>
+            <p><a href="emp-Appel">Click here </a>to do singleton test</p>
             <form method="post" action="emp-printNom">
                 <input type="text" name="nom">
+                <input type="text" name="prenom">
+                <input type="date" name="age">
                 <input type="submit" value="Valider">
             </form>
         </body>
