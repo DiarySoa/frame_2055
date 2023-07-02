@@ -59,20 +59,17 @@ public class Emp {
 	public ModelView printName(){
 		ModelView modelView = new ModelView("Veloma.jsp");
 		modelView.addItem("test",this.getNom());
-<<<<<<< Updated upstream
-=======
 		modelView.addItem("test2",this.getPrenom());
 		modelView.addItem("test3",this.getAge());
 		return modelView;
 	}
 
-	@Identification(user="henintsoa")
+	@Identification(user="un-deux-trois")
 	@AppRoute(url= "/emp-Appel")
 	public ModelView appel(){
 		ModelView modelView = new ModelView("singleton.jsp");
 		this.appel = this.appel+1;
 		modelView.addItem("nbr",this.appel);
->>>>>>> Stashed changes
 		return modelView;
 	}
 
