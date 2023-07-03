@@ -70,11 +70,25 @@ public class Emp {
 		return modelView;
 	}
 
+
+
+	@Identification(user="isa-roa-telo")
 	@AppRoute(url= "/emp-Appel")
 	public ModelView appel(){
 		ModelView modelView = new ModelView("singleton.jsp");
 		this.appel = this.appel+1;
 		modelView.addItem("nbr",this.appel);
+		return modelView;
+	}
+
+	@AppRoute(url= "/emp-Login")
+	public ModelView login(){
+		ModelView modelView = new ModelView("index.jsp");
+
+		modelView.addSession("user", "un-deux-trois");
+		modelView.addSession("admin", "un-deux-trois");
+		modelView.addSession("user", "isa-roa-telo");
+		modelView.addSession("admin", "isa-roa-telo");
 		return modelView;
 	}
 }
