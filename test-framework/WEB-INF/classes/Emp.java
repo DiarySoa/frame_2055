@@ -5,12 +5,18 @@ import java.time.LocalDate;
 import java.util.Calendar;
 
 import etu2055.framework.annotation.AppRoute;
+import etu2055.framework.annotation.Singleton;
 import etu2055.framework.ModelView;
+import etu2055.framework.annotation.Singleton;
+
+
+@Singleton
 
 public class Emp {
 	String nom;
 	String prenom;
 	Date dateNaissance;
+	
 	
 	@AppRoute(url = "/emp-get-nom")
 	public String getNom() {
@@ -57,7 +63,7 @@ public class Emp {
 	}
 	@AppRoute(url = "/emp-printNom")
 	public ModelView printName(){
-		ModelView modelView = new ModelView("Veloma.jsp");
+		ModelView modelView = new ModelView("test.jsp");
 		modelView.addItem("test",this.getNom());
 		modelView.addItem("test2",this.getPrenom());
 		modelView.addItem("test3",this.getAge());
@@ -65,8 +71,8 @@ public class Emp {
 	}
 
 
-	@Identification(user="isa-roa-telo")
 
+	@Identification(user="isa-roa-telo")
 	@AppRoute(url= "/emp-Appel")
 	public ModelView appel(){
 		ModelView modelView = new ModelView("singleton.jsp");
