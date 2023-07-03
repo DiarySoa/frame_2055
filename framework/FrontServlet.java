@@ -10,8 +10,14 @@ import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+<<<<<<< Updated upstream
+=======
+import java.util.Collection;
+import java.util.Collections;
+>>>>>>> Stashed changes
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.text.ParseException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -147,7 +153,82 @@ public class FrontServlet extends HttpServlet{
                 out.println("URLSTRING: "+urlString);
                 if(this.getMappingUrls().containsKey(urlString)) {
                 	Mapping mapping = this.getMappingUrls().get(urlString);
+<<<<<<< Updated upstream
                 	Class clazz = Class.forName(mapping.getClassName());
+=======
+            	Class clazz = Class.forName(mapping.getClassName());
+            	Object object = null;
+            	if(this.getSingletons().containsKey(mapping.getClassName())) {
+                	if(this.getSingletons().get(mapping.getClassName()) == null) {
+						System.out.println("Class insert in singletons: "+mapping.getClassName());
+                		this.getSingletons().replace(mapping.getClassName(), null ,clazz.getConstructor().newInstance());
+                	}
+                	object = this.getSingletons().get(mapping.getClassName());
+					setDefault(object);
+                }
+            	if( object == null ){
+					object = clazz.getConstructor().newInstance();
+				}
+
+                	Field[] fields = object.getClass().getDeclaredFields();
+                	Method[] allMethods = object.getClass().getDeclaredMethods();
+                 	Enumeration<String> enumeration = request.getParameterNames();
+					ArrayList<String> enumerationList = new ArrayList<String>();
+					enumerationList = enumerationToList(enumeration);
+					Method equalMethod = null;
+					for (int i = 0; i < allMethods.length; i++) {
+						if(allMethods[i].getName().compareTo(mapping.getMethod())==0) {
+							equalMethod = allMethods[i];
+							break;
+						}
+
+					if(equalMethod.isAnnotationPresent(etu2055.framework.annotation.Identification.class)) {
+					if(request.getSession().getAttribute(this.connectedSession)!=null) {
+						Identification authentification = equalMethod.getAnnotation(etu2055.framework.annotation.Identification.class);
+						if(!authentification.user().isEmpty() && !authentification.user().equals(request.getSession().getAttribute(this.profileSession))) {
+							throw new Exception("Vous ne pouvez pas accéder à cet URL");
+						}
+					}
+					else {
+						throw new Exception("Aucune Session en cours");
+					}
+				}
+
+				if(equalMethod.isAnnotationPresent(etu2055.framework.annotation.Session.class)) {
+					Method method = clazz.getDeclaredMethod("setSession", HashMap.class);
+					HashMap<String, Object> sess = new HashMap<String, Object>();
+					Enumeration<String> enume = request.getParameterNames();
+					List<String>les_sessions = Collections.list(enume);
+					for(String s : les_sessions){
+						Object temp = request.getSession().getAttribute(s);
+						sess.put(s, temp);
+					}
+					method.invoke(object, sess);
+				}
+
+					Parameter[] parameters = equalMethod.getParameters();
+					Object[] declaredParameter = new Object[parameters.length];
+					for (int i = 0; i < parameters.length; i++) {
+					if(checkIfExistForParameter(enumerationList, parameters[i])) {
+						Object parameterObject = request.getParameter(parameters[i].getName().trim());
+						parameterObject = cast(parameterObject, parameters[i].getType());
+						declaredParameter[i] = parameterObject;
+					}
+					else declaredParameter[i] = null;
+				}
+            	for (int i = 0; i < fields.length; i++) {
+					System.out.println("FIELD: "+fields[i].getName());
+					if(checkIfExistForField(enumerationList, fields[i])) {
+						System.out.println("EXIST FIELD: "+fields[i].getName());
+						Object attributObject = request.getParameter(fields[i].getName());
+						Object objectCast = cast(attributObject, fields[i].getType());
+						Method method = clazz.getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+						method.invoke(object, objectCast);
+					}
+				}
+
+
+>>>>>>> Stashed changes
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
                 	if(returnObject instanceof ModelView) {
@@ -156,6 +237,9 @@ public class FrontServlet extends HttpServlet{
                 		for (String key : data.keySet()) {
 							request.setAttribute(key, data.get(key));
 						}
+						for (String key : session.keySet()) {
+						request.getSession().setAttribute(key, session.get(key));
+					}
                 		RequestDispatcher requestDispatcher = request.getRequestDispatcher(modelView.getUrl());
                 		requestDispatcher.forward(request, response);
                 	}

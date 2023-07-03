@@ -11,6 +11,15 @@ public class Emp {
 	String nom;
 	String prenom;
 	Date dateNaissance;
+		HashMap<String, Object> session;
+
+	public HashMap<String, Object> getSession() {
+		return session;
+	}
+
+	public void setSession(HashMap<String, Object> session) {
+		this.session = session;
+	}
 	
 	@AppRoute(url = "/emp-get-nom")
 	public String getNom() {
