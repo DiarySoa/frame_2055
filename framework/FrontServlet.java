@@ -215,6 +215,10 @@ public class FrontServlet extends HttpServlet{
             	if( object == null ){
 					object = clazz.getConstructor().newInstance();
 				}
+
+                	Class clazz = Class.forName(mapping.getClassName());
+                	Object object = clazz.getConstructor().newInstance();
+
                 	Field[] fields = object.getClass().getDeclaredFields();
                 	Method[] allMethods = object.getClass().getDeclaredMethods();
                  	Enumeration<String> enumeration = request.getParameterNames();
@@ -230,6 +234,7 @@ public class FrontServlet extends HttpServlet{
 					Parameter[] parameters = equalMethod.getParameters();
 					Object[] declaredParameter = new Object[parameters.length];
 					for (int i = 0; i < parameters.length; i++) {
+
 					if(checkIfExistForParameter(enumerationList, parameters[i])) {
 						Object parameterObject = request.getParameter(parameters[i].getName().trim());
 						parameterObject = cast(parameterObject, parameters[i].getType());
@@ -247,6 +252,32 @@ public class FrontServlet extends HttpServlet{
 						method.invoke(object, objectCast);
 					}
 				}
+
+						if(checkIfExistForParameter(enumerationList, parameters[i])) {
+							Object parameterObject = request.getParameter(parameters[i].getName().trim());
+							parameterObject = cast(parameterObject, parameters[i].getType());
+							declaredParameter[i] = parameterObject;
+						}
+						else declaredParameter[i] = null;
+					}
+
+                	Object object = clazz.getConstructor().newInstance();
+                	Field[] fields = object.getClass().getDeclaredFields();
+                	Enumeration<String> enumeration = request.getParameterNames();
+					ArrayList<String> enumerationList = new ArrayList<String>();
+					enumerationList = enumerationToList(enumeration);
+
+                	for (int i = 0; i < fields.length; i++) {
+						System.out.println("FIELD: "+fields[i].getName());
+						if(checkIfExist(enumerationList, fields[i])) {
+							System.out.println("EXIST FIELD: "+fields[i].getName());
+							Object attributObject = request.getParameter(fields[i].getName());
+							Object objectCast = cast(attributObject, fields[i].getType());
+							Method method = clazz.getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+							method.invoke(object, objectCast);
+						}
+					}
+
 
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
