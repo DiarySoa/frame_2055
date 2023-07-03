@@ -5,14 +5,18 @@ import java.time.LocalDate;
 import java.util.Calendar;
 
 import etu2055.framework.annotation.AppRoute;
+import etu2055.framework.annotation.Singleton;
 import etu2055.framework.ModelView;
 import etu2055.framework.annotation.Singleton;
 
-@Singleton()
+
+@Singleton
+
 public class Emp {
 	String nom;
 	String prenom;
 	Date dateNaissance;
+	
 	
 	@AppRoute(url = "/emp-get-nom")
 	public String getNom() {
