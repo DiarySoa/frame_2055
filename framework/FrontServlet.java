@@ -2,22 +2,27 @@ package etu2055.framework.servlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.text.ParseException;
+import javax.servlet.http.Part;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import etu2055.framework.Mapping;
 import etu2055.framework.ModelView;
 import etu2055.framework.annotation.Identification;
@@ -36,12 +41,17 @@ public class FrontServlet extends HttpServlet{
 	public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
 		this.mappingUrls = mappingUrls;
 	}
+
+	public HashMap<String, Object> getSingletons() {
+		return singletons;
+	}
+
+	public void setSingletons(HashMap<String, Object> singletons) {
+		this.singletons = singletons;
+	}
 	
 	public static ArrayList<Class<?>> checkClasses(File directory, String packageName) throws Exception {
         ArrayList<Class<?>> classes = new ArrayList<>();
-        // if (!directory.exists()) {
-        //     return classes;
-        // }
 		String path = packageName.replaceAll("[.]","/");
 		URL packageUrl = Thread.currentThread().getContextClassLoader().getResource(path);
 		directory = new File(packageUrl.toURI());
@@ -115,6 +125,19 @@ public class FrontServlet extends HttpServlet{
 		return name.substring(0, 1).toUpperCase() + name.substring(1);
 	}
 	
+	public void setDefault(Object object)throws Exception{
+		Field[] fields = object.getClass().getDeclaredFields();
+		for (int i = 0; i < fields.length; i++) {
+			Method method = object.getClass().getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+			if(fields[i].getType().getName().contains("int") || fields[i].getType().getName().contains("double") || fields[i].getType().getName().contains("float")){
+				method.invoke(object, 0);
+			}else{
+				method.invoke(object, (Object)null);
+			}
+			
+		}
+	}
+
 	@Override
 	public void init() throws ServletException {
 		 File f = null;
@@ -136,6 +159,10 @@ public class FrontServlet extends HttpServlet{
 	                        this.getMappingUrls().put(url,newmap);
 	                    }
 	                }
+					if(classe.isAnnotationPresent(etu2055.framework.annotation.Singleton.class)) {
+						System.out.println("Class singleton: "+classe.getName());
+	                	this.getSingletons().put(classe.getName(), null);
+	                }
 	            } 
 	        }
 	        catch(Exception e){
@@ -145,7 +172,34 @@ public class FrontServlet extends HttpServlet{
 
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {		
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {     
+		PrintWriter out = response.getWriter();
+        try {     
+        	if(request.getContentType() != null) {
+        		System.out.println(request.getContentType());
+        		ArrayList<Upload> allUploads = new ArrayList<Upload>();
+        		Collection<Part> parts = request.getParts();
+				if(parts != null){
+					for (Part part : parts) {						
+						String fileName = part.getName();
+						Part filePart = request.getPart(fileName);
+						InputStream in = filePart.getInputStream();
+						byte[] fileBytes = in.readAllBytes();
+						String directory = "./uploads/";
+						File file = new File(directory);
+						if(!file.exists()){
+							file.mkdirs();
+						}
+						System.out.println("FileName: "+fileName+" ,Directory: "+directory+" FileBytes: "+fileBytes);
+						Upload Upload = new Upload();
+						Upload.setNom(fileName);
+						Upload.setSavePath(directory);
+						Upload.setByte_tab(fileBytes);
+						allUploads.add(Upload);						
+					}
+				}
+				System.out.println(allUploads);
+				request.setAttribute("all_uploads", allUploads);
+            
         	String url = request.getRequestURL().toString()+"?"+request.getQueryString();
         	out.println("URL: "+url);   
 			String doList = "";
@@ -175,6 +229,10 @@ public class FrontServlet extends HttpServlet{
             	if( object == null ){
 					object = clazz.getConstructor().newInstance();
 				}
+
+                	Class clazz = Class.forName(mapping.getClassName());
+                	Object object = clazz.getConstructor().newInstance();
+
                 	Field[] fields = object.getClass().getDeclaredFields();
                 	Method[] allMethods = object.getClass().getDeclaredMethods();
                  	Enumeration<String> enumeration = request.getParameterNames();
@@ -186,7 +244,6 @@ public class FrontServlet extends HttpServlet{
 							equalMethod = allMethods[i];
 							break;
 						}
-					}
 
 					if(equalMethod.isAnnotationPresent(etu2055.framework.annotation.Identification.class)) {
 					if(request.getSession().getAttribute(this.connectedSession)!=null) {
@@ -202,6 +259,11 @@ public class FrontServlet extends HttpServlet{
 					Parameter[] parameters = equalMethod.getParameters();
 					Object[] declaredParameter = new Object[parameters.length];
 					for (int i = 0; i < parameters.length; i++) {
+
+					Parameter[] parameters = equalMethod.getParameters();
+					Object[] declaredParameter = new Object[parameters.length];
+					for (int i = 0; i < parameters.length; i++) {
+
 					if(checkIfExistForParameter(enumerationList, parameters[i])) {
 						Object parameterObject = request.getParameter(parameters[i].getName().trim());
 						parameterObject = cast(parameterObject, parameters[i].getType());
@@ -219,6 +281,32 @@ public class FrontServlet extends HttpServlet{
 						method.invoke(object, objectCast);
 					}
 				}
+
+
+						if(checkIfExistForParameter(enumerationList, parameters[i])) {
+							Object parameterObject = request.getParameter(parameters[i].getName().trim());
+							parameterObject = cast(parameterObject, parameters[i].getType());
+							declaredParameter[i] = parameterObject;
+						}
+						else declaredParameter[i] = null;
+					}
+
+                	Object object = clazz.getConstructor().newInstance();
+                	Field[] fields = object.getClass().getDeclaredFields();
+                	Enumeration<String> enumeration = request.getParameterNames();
+					ArrayList<String> enumerationList = new ArrayList<String>();
+					enumerationList = enumerationToList(enumeration);
+
+                	for (int i = 0; i < fields.length; i++) {
+						System.out.println("FIELD: "+fields[i].getName());
+						if(checkIfExist(enumerationList, fields[i])) {
+							System.out.println("EXIST FIELD: "+fields[i].getName());
+							Object attributObject = request.getParameter(fields[i].getName());
+							Object objectCast = cast(attributObject, fields[i].getType());
+							Method method = clazz.getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+							method.invoke(object, objectCast);
+						}
+					}
 
 
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
@@ -257,5 +345,3 @@ public class FrontServlet extends HttpServlet{
         return "Short description";
     }
 }
-
-
