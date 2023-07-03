@@ -2,33 +2,40 @@ package etu2055.framework.servlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-<<<<<<< Updated upstream
-=======
 import java.util.Collection;
 import java.util.Collections;
->>>>>>> Stashed changes
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.text.ParseException;
+import javax.servlet.http.Part;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import etu2055.framework.Mapping;
 import etu2055.framework.ModelView;
+import etu2055.framework.annotation.Identification;
 
 public class FrontServlet extends HttpServlet{
 	HashMap<String, Mapping> mappingUrls;
+	HashMap<String, Object> singletons;
+	String connectedSession;
+	String profileSession;
+
 	
 	public HashMap<String, Mapping> getMappingUrls() {
 		return mappingUrls;
@@ -37,12 +44,17 @@ public class FrontServlet extends HttpServlet{
 	public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
 		this.mappingUrls = mappingUrls;
 	}
+
+	public HashMap<String, Object> getSingletons() {
+		return singletons;
+	}
+
+	public void setSingletons(HashMap<String, Object> singletons) {
+		this.singletons = singletons;
+	}
 	
 	public static ArrayList<Class<?>> checkClasses(File directory, String packageName) throws Exception {
         ArrayList<Class<?>> classes = new ArrayList<>();
-        // if (!directory.exists()) {
-        //     return classes;
-        // }
 		String path = packageName.replaceAll("[.]","/");
 		URL packageUrl = Thread.currentThread().getContextClassLoader().getResource(path);
 		directory = new File(packageUrl.toURI());
@@ -92,10 +104,20 @@ public class FrontServlet extends HttpServlet{
 	    return list;
 	}
 
-	public static boolean checkIfExist(ArrayList<String> enumerationList, Field field){
+	public static boolean checkIfExistForField(ArrayList<String> enumerationList, Field field){
 		for(int i = 0; i < enumerationList.size(); i++){
 			System.out.println("ENUMERATION: "+enumerationList.get(i)+" field: "+field.getName());
 			if(field.getName().compareTo(enumerationList.get(i))==0){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean checkIfExistForParameter(ArrayList<String> enumerationList, Parameter parameter){
+		for(int i = 0; i < enumerationList.size(); i++){
+			System.out.println("ENUMERATION: "+enumerationList.get(i).trim()+" parameter: "+parameter.getName().trim());
+			if(parameter.getName().trim().compareTo(enumerationList.get(i).trim())==0){
 				return true;
 			}
 		}
@@ -106,6 +128,19 @@ public class FrontServlet extends HttpServlet{
 		return name.substring(0, 1).toUpperCase() + name.substring(1);
 	}
 	
+	public void setDefault(Object object)throws Exception{
+		Field[] fields = object.getClass().getDeclaredFields();
+		for (int i = 0; i < fields.length; i++) {
+			Method method = object.getClass().getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+			if(fields[i].getType().getName().contains("int") || fields[i].getType().getName().contains("double") || fields[i].getType().getName().contains("float")){
+				method.invoke(object, 0);
+			}else{
+				method.invoke(object, (Object)null);
+			}
+			
+		}
+	}
+
 	@Override
 	public void init() throws ServletException {
 		 File f = null;
@@ -127,6 +162,10 @@ public class FrontServlet extends HttpServlet{
 	                        this.getMappingUrls().put(url,newmap);
 	                    }
 	                }
+					if(classe.isAnnotationPresent(etu2055.framework.annotation.Singleton.class)) {
+						System.out.println("Class singleton: "+classe.getName());
+	                	this.getSingletons().put(classe.getName(), null);
+	                }
 	            } 
 	        }
 	        catch(Exception e){
@@ -136,7 +175,34 @@ public class FrontServlet extends HttpServlet{
 
 	protected void processRequest(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {		
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {     
+		PrintWriter out = response.getWriter();
+        try {     
+        	if(request.getContentType() != null) {
+        		System.out.println(request.getContentType());
+        		ArrayList<Upload> allUploads = new ArrayList<Upload>();
+        		Collection<Part> parts = request.getParts();
+				if(parts != null){
+					for (Part part : parts) {						
+						String fileName = part.getName();
+						Part filePart = request.getPart(fileName);
+						InputStream in = filePart.getInputStream();
+						byte[] fileBytes = in.readAllBytes();
+						String directory = "./uploads/";
+						File file = new File(directory);
+						if(!file.exists()){
+							file.mkdirs();
+						}
+						System.out.println("FileName: "+fileName+" ,Directory: "+directory+" FileBytes: "+fileBytes);
+						Upload Upload = new Upload();
+						Upload.setNom(fileName);
+						Upload.setSavePath(directory);
+						Upload.setByte_tab(fileBytes);
+						allUploads.add(Upload);						
+					}
+				}
+				System.out.println(allUploads);
+				request.setAttribute("all_uploads", allUploads);
+            
         	String url = request.getRequestURL().toString()+"?"+request.getQueryString();
         	out.println("URL: "+url);   
 			String doList = "";
@@ -153,10 +219,7 @@ public class FrontServlet extends HttpServlet{
                 out.println("URLSTRING: "+urlString);
                 if(this.getMappingUrls().containsKey(urlString)) {
                 	Mapping mapping = this.getMappingUrls().get(urlString);
-<<<<<<< Updated upstream
-                	Class clazz = Class.forName(mapping.getClassName());
-=======
-            	Class clazz = Class.forName(mapping.getClassName());
+
             	Object object = null;
             	if(this.getSingletons().containsKey(mapping.getClassName())) {
                 	if(this.getSingletons().get(mapping.getClassName()) == null) {
@@ -227,8 +290,6 @@ public class FrontServlet extends HttpServlet{
 					}
 				}
 
-
->>>>>>> Stashed changes
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
                 	if(returnObject instanceof ModelView) {
@@ -243,13 +304,14 @@ public class FrontServlet extends HttpServlet{
                 		RequestDispatcher requestDispatcher = request.getRequestDispatcher(modelView.getUrl());
                 		requestDispatcher.forward(request, response);
                 	}
-                }        
+                     
 
-        }
+				}}}}
         catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)throws ServletException, IOException {
@@ -268,5 +330,3 @@ public class FrontServlet extends HttpServlet{
         return "Short description";
     }
 }
-
-
