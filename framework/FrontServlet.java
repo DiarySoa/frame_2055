@@ -29,8 +29,6 @@ import etu2055.framework.ModelView;
 public class FrontServlet extends HttpServlet{
 	HashMap<String, Mapping> mappingUrls;
 	HashMap<String, Object> singletons;
-	String connectedSession;
-	String profileSession;
 	
 	public HashMap<String, Mapping> getMappingUrls() {
 		return mappingUrls;
@@ -39,7 +37,7 @@ public class FrontServlet extends HttpServlet{
 	public void setMappingUrls(HashMap<String, Mapping> mappingUrls) {
 		this.mappingUrls = mappingUrls;
 	}
-		
+
 	public HashMap<String, Object> getSingletons() {
 		return singletons;
 	}
@@ -113,6 +111,19 @@ public class FrontServlet extends HttpServlet{
 		return name.substring(0, 1).toUpperCase() + name.substring(1);
 	}
 	
+	public void setDefault(Object object)throws Exception{
+		Field[] fields = object.getClass().getDeclaredFields();
+		for (int i = 0; i < fields.length; i++) {
+			Method method = object.getClass().getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+			if(fields[i].getType().getName().contains("int") || fields[i].getType().getName().contains("double") || fields[i].getType().getName().contains("float")){
+				method.invoke(object, 0);
+			}else{
+				method.invoke(object, (Object)null);
+			}
+			
+		}
+	}
+
 	@Override
 	public void init() throws ServletException {
 		 File f = null;
@@ -134,7 +145,6 @@ public class FrontServlet extends HttpServlet{
 	                        this.getMappingUrls().put(url,newmap);
 	                    }
 	                }
-
 					if(classe.isAnnotationPresent(etu2055.framework.annotation.Singleton.class)) {
 						System.out.println("Class singleton: "+classe.getName());
 	                	this.getSingletons().put(classe.getName(), null);
@@ -192,8 +202,23 @@ public class FrontServlet extends HttpServlet{
                 out.println("URLSTRING: "+urlString);
                 if(this.getMappingUrls().containsKey(urlString)) {
                 	Mapping mapping = this.getMappingUrls().get(urlString);
+            	Class clazz = Class.forName(mapping.getClassName());
+            	Object object = null;
+            	if(this.getSingletons().containsKey(mapping.getClassName())) {
+                	if(this.getSingletons().get(mapping.getClassName()) == null) {
+						System.out.println("Class insert in singletons: "+mapping.getClassName());
+                		this.getSingletons().replace(mapping.getClassName(), null ,clazz.getConstructor().newInstance());
+                	}
+                	object = this.getSingletons().get(mapping.getClassName());
+					setDefault(object);
+                }
+            	if( object == null ){
+					object = clazz.getConstructor().newInstance();
+				}
+
                 	Class clazz = Class.forName(mapping.getClassName());
                 	Object object = clazz.getConstructor().newInstance();
+
                 	Field[] fields = object.getClass().getDeclaredFields();
                 	Method[] allMethods = object.getClass().getDeclaredMethods();
                  	Enumeration<String> enumeration = request.getParameterNames();
@@ -209,6 +234,25 @@ public class FrontServlet extends HttpServlet{
 					Parameter[] parameters = equalMethod.getParameters();
 					Object[] declaredParameter = new Object[parameters.length];
 					for (int i = 0; i < parameters.length; i++) {
+
+					if(checkIfExistForParameter(enumerationList, parameters[i])) {
+						Object parameterObject = request.getParameter(parameters[i].getName().trim());
+						parameterObject = cast(parameterObject, parameters[i].getType());
+						declaredParameter[i] = parameterObject;
+					}
+					else declaredParameter[i] = null;
+				}
+            	for (int i = 0; i < fields.length; i++) {
+					System.out.println("FIELD: "+fields[i].getName());
+					if(checkIfExistForField(enumerationList, fields[i])) {
+						System.out.println("EXIST FIELD: "+fields[i].getName());
+						Object attributObject = request.getParameter(fields[i].getName());
+						Object objectCast = cast(attributObject, fields[i].getType());
+						Method method = clazz.getDeclaredMethod("set"+capitalizedName(fields[i].getName()),fields[i].getType());
+						method.invoke(object, objectCast);
+					}
+				}
+
 						if(checkIfExistForParameter(enumerationList, parameters[i])) {
 							Object parameterObject = request.getParameter(parameters[i].getName().trim());
 							parameterObject = cast(parameterObject, parameters[i].getType());
@@ -233,6 +277,7 @@ public class FrontServlet extends HttpServlet{
 							method.invoke(object, objectCast);
 						}
 					}
+
 
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
@@ -270,5 +315,3 @@ public class FrontServlet extends HttpServlet{
         return "Short description";
     }
 }
-
-
