@@ -64,7 +64,9 @@ public class Emp {
 		return modelView;
 	}
 
-	@Identification(user="un-deux-trois")
+
+	@Identification(user="isa-roa-telo")
+
 	@AppRoute(url= "/emp-Appel")
 	public ModelView appel(){
 		ModelView modelView = new ModelView("singleton.jsp");
@@ -76,8 +78,11 @@ public class Emp {
 	@AppRoute(url= "/emp-Login")
 	public ModelView login(){
 		ModelView modelView = new ModelView("index.jsp");
+
 		modelView.addSession("user", "un-deux-trois");
 		modelView.addSession("admin", "un-deux-trois");
+		modelView.addSession("user", "isa-roa-telo");
+		modelView.addSession("admin", "isa-roa-telo");
 		return modelView;
 	}
 }
