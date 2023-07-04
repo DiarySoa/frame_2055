@@ -13,11 +13,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.text.ParseException;
 import javax.servlet.http.Part;
 import javax.servlet.RequestDispatcher;
@@ -219,7 +216,7 @@ public class FrontServlet extends HttpServlet{
                 out.println("URLSTRING: "+urlString);
                 if(this.getMappingUrls().containsKey(urlString)) {
                 	Mapping mapping = this.getMappingUrls().get(urlString);
-
+            	Class clazz = Class.forName(mapping.getClassName());
             	Object object = null;
             	if(this.getSingletons().containsKey(mapping.getClassName())) {
                 	if(this.getSingletons().get(mapping.getClassName()) == null) {
@@ -256,19 +253,6 @@ public class FrontServlet extends HttpServlet{
 						throw new Exception("Aucune Session en cours");
 					}
 				}
-
-				if(equalMethod.isAnnotationPresent(etu2055.framework.annotation.Session.class)) {
-					Method method = clazz.getDeclaredMethod("setSession", HashMap.class);
-					HashMap<String, Object> sess = new HashMap<String, Object>();
-					Enumeration<String> enume = request.getParameterNames();
-					List<String>les_sessions = Collections.list(enume);
-					for(String s : les_sessions){
-						Object temp = request.getSession().getAttribute(s);
-						sess.put(s, temp);
-					}
-					method.invoke(object, sess);
-				}
-
 					Parameter[] parameters = equalMethod.getParameters();
 					Object[] declaredParameter = new Object[parameters.length];
 					for (int i = 0; i < parameters.length; i++) {
@@ -290,6 +274,7 @@ public class FrontServlet extends HttpServlet{
 					}
 				}
 
+
                 	Method method = clazz.getDeclaredMethod(mapping.getMethod());
                 	Object returnObject = method.invoke(object,(Object[])null);
                 	if(returnObject instanceof ModelView) {
@@ -298,9 +283,6 @@ public class FrontServlet extends HttpServlet{
                 		for (String key : data.keySet()) {
 							request.setAttribute(key, data.get(key));
 						}
-						for (String key : session.keySet()) {
-						request.getSession().setAttribute(key, session.get(key));
-					}
                 		RequestDispatcher requestDispatcher = request.getRequestDispatcher(modelView.getUrl());
                 		requestDispatcher.forward(request, response);
                 	}
