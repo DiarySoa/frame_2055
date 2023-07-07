@@ -1,4 +1,4 @@
-package etu2055.framework;
+package etu2055.framework.annotation;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
