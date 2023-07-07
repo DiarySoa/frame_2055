@@ -26,7 +26,10 @@ import javax.servlet.http.Part;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+<<<<<<< HEAD
 import com.google.gson.Gson;
+=======
+>>>>>>> c14b44f0a078aa10ef9a6b15af7fa3565480c77a
 
 import etu2055.framework.*;
 
@@ -302,10 +305,13 @@ public class FrontServlet extends HttpServlet{
             		HashMap<String, Object> data = modelView.getData();
             		HashMap<String, Object> session = modelView.getSession();
             		
+<<<<<<< HEAD
 					if(modelView.getJson() == true){
 							response.setContentType("application/json");
 							out.println(new Gson().toJson(modelView.getData()));
 					}
+=======
+>>>>>>> c14b44f0a078aa10ef9a6b15af7fa3565480c77a
 					for (String key : data.keySet()) {
 						request.setAttribute(key, data.get(key));
 					}
@@ -313,7 +319,10 @@ public class FrontServlet extends HttpServlet{
             		for (String key : session.keySet()) {
 						request.getSession().setAttribute(key, session.get(key));
 					}
+<<<<<<< HEAD
 					
+=======
+>>>>>>> c14b44f0a078aa10ef9a6b15af7fa3565480c77a
             		RequestDispatcher requestDispatcher = request.getRequestDispatcher(modelView.getUrl());
             		requestDispatcher.forward(request, response);
             	}
