@@ -4,13 +4,26 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Calendar;
 
-import etu2055.framework.annotation.AppRoute;
-import etu2055.framework.ModelView;
+import etu2055.framework.*;
+import java.util.*;
+
+@Singleton
 
 public class Emp {
 	String nom;
 	String prenom;
+	int appel;
 	Date dateNaissance;
+		HashMap<String, Object> session;
+
+	public HashMap<String, Object> getSession() {
+		return session;
+	}
+
+	public void setSession(HashMap<String, Object> session) {
+		this.session = session;
+	}
+	
 	
 	@AppRoute(url = "/emp-get-nom")
 	public String getNom() {
@@ -57,8 +70,32 @@ public class Emp {
 	}
 	@AppRoute(url = "/emp-printNom")
 	public ModelView printName(){
-		ModelView modelView = new ModelView("Veloma.jsp");
+		ModelView modelView = new ModelView("test.jsp");
 		modelView.addItem("test",this.getNom());
+		modelView.addItem("test2",this.getPrenom());
+		modelView.addItem("test3",this.getAge());
+		return modelView;
+	}
+
+
+
+	@Identification(user="isa-roa-telo")
+	@AppRoute(url= "/emp-Appel")
+	public ModelView appel(){
+		ModelView modelView = new ModelView("singleton.jsp");
+		this.appel = this.appel+1;
+		modelView.addItem("nbr",this.appel);
+		return modelView;
+	}
+
+	@AppRoute(url= "/emp-Login")
+	public ModelView login(){
+		ModelView modelView = new ModelView("index.jsp");
+
+		modelView.addSession("user", "un-deux-trois");
+		modelView.addSession("admin", "un-deux-trois");
+		modelView.addSession("user", "isa-roa-telo");
+		modelView.addSession("admin", "isa-roa-telo");
 		return modelView;
 	}
 }
