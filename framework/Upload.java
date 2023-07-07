@@ -1,5 +1,5 @@
 
-package etu2055.framework.fileUpload;
+package etu2055.framework;
 
 import java.io.File;
 import java.io.FileNotFoundException;

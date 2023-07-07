@@ -4,17 +4,15 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Calendar;
 
-import etu2055.framework.annotation.AppRoute;
-import etu2055.framework.annotation.Singleton;
-import etu2055.framework.ModelView;
-import etu2055.framework.annotation.Singleton;
-
+import etu2055.framework.*;
+import java.util.*;
 
 @Singleton
 
 public class Emp {
 	String nom;
 	String prenom;
+	int appel;
 	Date dateNaissance;
 		HashMap<String, Object> session;
 
@@ -73,6 +71,7 @@ public class Emp {
 	@AppRoute(url = "/emp-printNom")
 	public ModelView printName(){
 		ModelView modelView = new ModelView("test.jsp");
+		modelView.setJson(true);
 		modelView.addItem("test",this.getNom());
 		modelView.addItem("test2",this.getPrenom());
 		modelView.addItem("test3",this.getAge());
