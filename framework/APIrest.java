@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface AppRoute {
-	String url() default "";
+public @interface APIrest {
+	
 }

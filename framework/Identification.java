@@ -1,4 +1,4 @@
-package etu2055.framework.annotation;
+package etu2055.framework;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(METHOD)
-
-public @interface Identification{
+public @interface Identification {
 	String user() default "";
 }
+

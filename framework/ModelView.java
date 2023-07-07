@@ -1,11 +1,39 @@
 package etu2055.framework;
 
-import java.util.HashMap;
+import java.util.*;
 
 public class ModelView {
 	String url;
 	HashMap<String,Object> data;
 	HashMap<String, Object> session;
+	boolean json = false;
+	boolean invalidateSession = false;
+	List<String> removeSession = new ArrayList<>();
+
+	public void addToremove(String ...data){
+		for (int i = 0; i < data.length; i++) {
+			this.removeSession.add(data[i]);
+		}
+	}
+
+	public void isInvalidateSession(boolean invalidateSession){
+		this.invalidateSession = invalidateSession;
+	}
+
+	public void setRemoveSession(List<String> removeSession){
+		this.removeSession = removeSession;
+	}
+
+	public List<String> getRemoveSession(){
+		return removeSession;
+	}
+
+	public boolean getJson(){
+		return json;
+	}
+	public void setJson(){
+		this.json = json;
+	}
 	
 	public String getUrl() {
 		return url;
