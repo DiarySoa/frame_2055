@@ -4,9 +4,7 @@ set "FRAMEWORK_DIR=D:/Framework/essaie2/frame_2055/framework"
 set "TEST_FRAMEWORK_DIR=D:/Framework/essaie2/frame_2055/test-framework"
 set "TEMPORARY_DIR=D:/Framework/essaie2/frame_2055/temporary"
 set "TOMCAT_DIR=C:/Program Files/Apache Software Foundation/Tomcat 9.0_Tomcat9.0"
-
-
-
+ 
 cd "%FRAMEWORK_DIR%"
 
 javac -parameters -d . *.java
@@ -21,11 +19,11 @@ mkdir "WEB-INF\lib"
 
 copy /y "%FRAMEWORK_DIR%\framework.jar" "WEB-INF\lib"
 
-xcopy /s /e /y "%TEST_FRAMEWORK_DIR%\WEB-INF\classes" "WEB-INF\classes"
+xcopy /s /e /y "WEB-INF\classes" "%TEST_FRAMEWORK_DIR%\WEB-INF\classes" 
 
-copy /y "%TEST_FRAMEWORK_DIR%\WEB-INF\lib\*" "WEB-INF\lib"
+copy /y  "WEB-INF\lib" "%TEST_FRAMEWORK_DIR%\WEB-INF\lib\*"
 
-copy /y "%TEST_FRAMEWORK_DIR%\WEB-INF\web.xml" "WEB-INF"
+copy /y "WEB-INF" "%TEST_FRAMEWORK_DIR%\WEB-INF\web.xml" 
 
 cd "%TEST_FRAMEWORK_DIR%"
 
