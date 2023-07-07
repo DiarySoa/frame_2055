@@ -25,9 +25,25 @@
       <servlet-name>frontservlet</servlet-name>
       <servlet-class>etu2055.framework.servlet.FrontServlet</servlet-class>
     </servlet>
+    <init-param>
+    <param-name>test</param-name>
+     <param-value>test</param-value>
+     </init-param>
+
+     <init-param>
+    <param-name>sessionName</param-name>
+     <param-value>isConnected</param-value>
+     </init-param>
+
+     <init-param>
+    <param-name>sessionProfile</param-name>
+     <param-value>profile</param-value>
+     </init-param>
+
 
     <servlet-mapping>
         <servlet-name>frontservlet</servlet-name>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 </web-app>
+
