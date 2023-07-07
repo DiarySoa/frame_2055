@@ -4,17 +4,15 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Calendar;
 
-import etu2055.framework.annotation.AppRoute;
-import etu2055.framework.annotation.Singleton;
-import etu2055.framework.ModelView;
-import etu2055.framework.annotation.Singleton;
-
+import etu2055.framework.*;
+import java.util.*;
 
 @Singleton
 
 public class Emp {
 	String nom;
 	String prenom;
+	int appel;
 	Date dateNaissance;
 	
 	
@@ -91,4 +89,6 @@ public class Emp {
 		modelView.addSession("admin", "isa-roa-telo");
 		return modelView;
 	}
+
+	
 }
