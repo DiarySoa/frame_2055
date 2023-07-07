@@ -6,6 +6,14 @@ public class ModelView {
 	String url;
 	HashMap<String,Object> data;
 	HashMap<String, Object> session;
+	boolean json = false;
+
+	public boolean getJson(){
+		return json;
+	}
+	public void setJson(){
+		this.json = json;
+	}
 	
 	public String getUrl() {
 		return url;
